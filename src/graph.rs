@@ -1,5 +1,4 @@
 // Defines the transit graph structure and builds it from the records.
-
 use std::collections::HashMap;
 use crate::load::TrainRecord;
 // Type alias for station name
@@ -11,7 +10,6 @@ pub type WeightedEdge = (Station, Station, f32);
 pub struct TransitGraph {
     pub nodes: HashMap<Station, Vec<(Station, f32)>>, // Map from station to list of destination stations with delay
 }
-
 impl TransitGraph {
     // Constructs a TransitGraph from a slice of TrainRecords
     // Input: slice of TrainRecord structs

@@ -19,46 +19,57 @@ impl TransitGraph {
         stations
     }
 
-    // Computes the shortest path (by total delay) from start to end station using Dijkstra’s algorithm
-    // Input: start and end station names
-    // Output: Option<(total delay, path of stations)>
-    pub fn shortest_path(&self, start: &Station, end: &Station) -> Option<(f32, Vec<Station>)> {
-        let mut distances: HashMap<Station, f32> = HashMap::new();
-        let mut previous: HashMap<Station, Station> = HashMap::new();
-        let mut heap = BinaryHeap::new();
-        heap.push(Reverse((NotNan::new(0.0).unwrap(), start.clone()))); // Initialize heap with starting point
-        distances.insert(start.clone(), 0.0);
-        while let Some(Reverse((wrapped_dist, station))) = heap.pop() {
-            let dist = wrapped_dist.into_inner();
-            if &station == end {
-                let mut path = vec![end.clone()];
-                let mut current = end.clone();
-                // Reconstruct the path from end to start
-                while let Some(prevstation) = previous.get(&current) {
-                    path.push(prevstation.clone());
-                    current = prevstation.clone();
-                }
-                path.reverse();
-                return Some((dist, path));
-            }
+// Computes the shortest path (by total delay) from start to end station using Dijkstra’s algorithm.
+// Input: station names for `start` and `end`.
+// Output: Option containing a tuple of (total delay, list of stations along the shortest path).
+pub fn shortest_path(&self, start: &Station, end: &Station) -> Option<(f32, Vec<Station>)> {
+    let mut distances: HashMap<Station, f32> = HashMap::new(); 
+    let mut previous: HashMap<Station, Station> = HashMap::new();
+    let mut heap = BinaryHeap::new(); 
 
-            if let Some(neighbors) = self.nodes.get(&station) {
-                for (neighbor, weight) in neighbors {
-                    let new_dist = dist + *weight;
-                    let is_better = match distances.get(neighbor) {
-                        None => true,
-                        Some(&current_dist) => new_dist < current_dist,
-                    };
-                    if is_better {
-                        distances.insert(neighbor.clone(), new_dist);
-                        previous.insert(neighbor.clone(), station.clone());
-                        heap.push(Reverse((NotNan::new(new_dist).unwrap(), neighbor.clone())));
-                    }
+    // Insert the starting station into the heap with 0 delay
+    heap.push(Reverse((NotNan::new(0.0).unwrap(), start.clone())));
+    distances.insert(start.clone(), 0.0);
+
+    // Main loop: extract the station with the shortest known delay
+    while let Some(Reverse((wrapped_dist, station))) = heap.pop() {
+        let dist = wrapped_dist.into_inner(); 
+
+        // If we've reached the destination, reconstruct and return the full path
+        if &station == end {
+            let mut path = vec![end.clone()];
+            let mut current = end.clone();
+            // Walk backwards using `previous` map to reconstruct path from end to start
+            while let Some(prevstation) = previous.get(&current) {
+                path.push(prevstation.clone());
+                current = prevstation.clone();
+            }
+            path.reverse(); // Reverse the path so it's from start → end
+            return Some((dist, path)); 
+        }
+
+        // If this station has neighbors, explore them
+        if let Some(neighbors) = self.nodes.get(&station) {
+            for (neighbor, weight) in neighbors {
+                let new_dist = dist + *weight; // Calculate total delay to neighbor through current station
+                // Check if this new path is better than any previously known path
+                let is_better = match distances.get(neighbor) {
+                    None => true, 
+                    Some(&current_dist) => new_dist < current_dist, // Found a shorter path
+                };
+                // If it's better, update our records and push neighbor onto the heap
+                if is_better {
+                    distances.insert(neighbor.clone(), new_dist);
+                    previous.insert(neighbor.clone(), station.clone());
+                    heap.push(Reverse((NotNan::new(new_dist).unwrap(), neighbor.clone()))); 
                 }
             }
         }
-        None // No path found
     }
+
+    None 
+}
+
 
     // Calculates closeness centrality for a given station
     // Returns None if station is isolated or unreachable from others
@@ -97,9 +108,7 @@ impl TransitGraph {
                 results.push((station.clone(), score));
             }
         }
-
         results.sort_by(|a, b| b.1.partial_cmp(&a.1).unwrap());
-
         println!("Top {} stations by closeness centrality:", top_n);
         for (i, (station, score)) in results.iter().take(top_n).enumerate() {
             println!("{:>2}. {:<30} {:.4}", i + 1, station, score);
@@ -166,7 +175,7 @@ impl TransitGraph {
             }
         }
 
-        centrality // Return final centrality map
+        centrality
     }
 
 

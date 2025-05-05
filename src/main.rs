@@ -75,7 +75,6 @@ fn test_rank_routes_by_average_delay_sorted_descending() {
     let graph = TransitGraph::from_records(&records);
     let mut averages = graph.get_route_average_delays();
     averages.sort_by(|a, b| b.1.partial_cmp(&a.1).unwrap());
-
     for i in 1..averages.len() {
         assert!(
             averages[i - 1].1 >= averages[i].1,
