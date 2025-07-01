@@ -7,7 +7,7 @@ use load::load_data; // Function to read CSV data into TrainRecords
 use graph::TransitGraph; // Transit network graph implementation
 
 fn main() {
-    let path = "src/stations_filtered.csv"; 
+    let path = "../src/data/filtered/stations_filtered.csv"; 
     let records = load_data(path).expect("Failed to load data"); 
     let graph = TransitGraph::from_records(&records); 
     // Print ranked stations by closeness centrality (top 10)
@@ -23,7 +23,7 @@ fn main() {
 // Unit test: ensure real data loads and contains a large number of records
 #[test]
 fn test_load_real_data() {
-    let path = "src/stations_filtered.csv";
+    let path = "../src/data/filtered/stations_filtered.csv";
     let records = load_data(path).expect("Could not load data");
     assert!(records.len() > 1000);
 }
@@ -31,7 +31,7 @@ fn test_load_real_data() {
 // Unit test: ensure a valid shortest path exists between two key stations
 #[test]
 fn test_real_shortest_path_exists() {
-    let path = "src/stations_filtered.csv";
+    let path = "../src/data/filtered/stations_filtered.csv";
     let records = load_data(path).expect("Could not load data");
     let graph = TransitGraph::from_records(&records);
     let from = "New York Penn Station".to_string();
@@ -48,7 +48,7 @@ fn test_real_shortest_path_exists() {
 // Unit test: check that closeness centrality for a major station is valid and finite
 #[test]
 fn test_closeness_is_finite_for_main_station() {
-    let path = "src/stations_filtered.csv";
+    let path = "../src/data/filtered/stations_filtered.csv";
     let records = load_data(path).expect("Could not load data");
     let graph = TransitGraph::from_records(&records);
     let station = "Walnut Street".to_string(); 
@@ -60,7 +60,7 @@ fn test_closeness_is_finite_for_main_station() {
 // Unit test: verify that all betweenness scores are non-negative
 #[test]
 fn test_betweenness_non_negative() {
-    let records = load_data("src/stations_filtered.csv").expect("Failed to load CSV");
+    let records = load_data("../src/data/filtered/stations_filtered.csv").expect("Failed to load CSV");
     let graph = TransitGraph::from_records(&records);
     let centrality = graph.betweenness_centrality();
     for (station, score) in centrality {
@@ -71,7 +71,7 @@ fn test_betweenness_non_negative() {
 // Unit test: ensure that route delays are sorted in descending order by average delay
 #[test]
 fn test_rank_routes_by_average_delay_sorted_descending() {
-    let records = load_data("src/stations_filtered.csv").expect("Failed to load CSV");
+    let records = load_data("../src/data/filtered/stations_filtered.csv").expect("Failed to load CSV");
     let graph = TransitGraph::from_records(&records);
     let mut averages = graph.get_route_average_delays();
     averages.sort_by(|a, b| b.1.partial_cmp(&a.1).unwrap());
